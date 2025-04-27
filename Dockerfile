@@ -8,7 +8,7 @@ COPY . /app
 # Install Flask and other dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-EXPOSE 7070
+EXPOSE 8080
 
 ENV NAME World
 
