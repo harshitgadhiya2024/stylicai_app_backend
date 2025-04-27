@@ -9,7 +9,7 @@ from email.message import EmailMessage
 
 SMTP_SERVER = "email-smtp.us-east-1.amazonaws.com"  # Change if using Outlook, Yahoo, etc.
 SMTP_PORT = 587  # Use 465 for SSL, 587 for TLS
-EMAIL_ADDRESS = "info.quickoo@gmail.com"
+EMAIL_ADDRESS = "noreply@stylic.ai"
 EMAIL_USERNAME="AKIAT7JJVFTWJFRSQZFK"
 EMAIL_APP_PASS="BMw96DA7BJsclYOMgFIdJe4pP8URWihksjDGpdANwmzD"
 
