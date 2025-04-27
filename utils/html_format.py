@@ -99,7 +99,7 @@ class htmlOperation():
                 <body>
                     <div class="container">
                         <div class="header">
-                            <div class="logo">Quick<span>oo</span></div>
+                            <div class="logo"><img src="https://stylic.ai/assets/stylic-logo-1-BQOP5sjr.png" width="200"></div>
                         </div>
                         <div class="content">
                             <h2>Verify Your Account</h2>
