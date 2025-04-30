@@ -221,7 +221,7 @@ def background_images_stylic():
         print(f"{datetime.now()}: Error in stylic background images route: {str(e)}")
         return response_data
 
-@app.route("/stylic/get-user-data", methods=["GET"])
+@app.route("/stylic/get-user-data", methods=["POST"])
 def get_user_data():
     try:
         user_id = request.form["user_id"]
