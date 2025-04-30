@@ -221,6 +221,24 @@ def background_images_stylic():
         print(f"{datetime.now()}: Error in stylic background images route: {str(e)}")
         return response_data
 
+@app.route("/stylic/get-user-data", methods=["GET"])
+def get_user_data():
+    try:
+        user_id = request.form["user_id"]
+        get_all_user_data = list(
+            mongoOperation().get_spec_data_from_coll(client, "stylic", "user_data", {"user_id": user_id}))
+        response_data = get_all_user_data[0]
+        del response_data["_id"]
+        del response_data["created_at"]
+        del response_data["updated_at"]
+        response_data_msg = commonOperation().get_success_response(200, response_data)
+        return response_data_msg
+
+    except Exception as e:
+        response_data = commonOperation().get_error_msg("Please try again...")
+        print(f"{datetime.now()}: Error in stylic user data route: {str(e)}")
+        return response_data
+
 @app.route('/download/<filename>')
 def download_file(filename):
     return send_from_directory(app.config['BACKGROUND_FOLDER'], filename)
