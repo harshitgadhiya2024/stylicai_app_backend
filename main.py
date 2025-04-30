@@ -14,6 +14,7 @@ CORS(app)
 
 app.config["SECRET_KEY"] = constant_dict.get("secreat_key")
 UPLOAD_FOLDER = 'static/uploads/'
+app.config['BACKGROUND_FOLDER'] = "static/background_images"
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -153,6 +154,21 @@ def change_password():
         response_data = commonOperation().get_error_msg("Please try again...")
         print(f"{datetime.now()}: Error in change password route: {str(e)}")
         return response_data
+
+@app.route("/stylic/background-images", methods=["GET"])
+def background_images_stylic():
+    try:
+        background_images = constant_dict.get("background_images", [])
+        return jsonify(background_images)
+
+    except Exception as e:
+        response_data = commonOperation().get_error_msg("Please try again...")
+        print(f"{datetime.now()}: Error in stylic background images route: {str(e)}")
+        return response_data
+
+@app.route('/download/<filename>')
+def download_file(filename):
+    return send_from_directory(app.config['BACKGROUND_FOLDER'], filename)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3030)
