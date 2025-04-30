@@ -7,6 +7,7 @@ from flask_cors import CORS
 from datetime import datetime, date
 from operations.mail_sending import emailOperation
 from utils.html_format import htmlOperation
+from werkzeug.utils import secure_filename
 import uuid
 
 app = Flask(__name__)
@@ -155,6 +156,60 @@ def change_password():
         print(f"{datetime.now()}: Error in change password route: {str(e)}")
         return response_data
 
+@app.route("/stylic/create-photoshoot", methods=["POST"])
+def create_photoshoot():
+    try:
+        user_id = request.args.get("user_id", "")
+        garment_type = request.form.get('garment_type', '')
+        gender = request.form.get('gender', '')
+        age_group = request.form.get('age_group', '')
+        garment_description = request.form.get('garment_description', '')
+        photoshoot_type = request.form.get('photoshoot_type', '')
+        color_type = request.form.get('color_type', '')
+        background_id = request.form.get("background_id", '')
+        selected_background_image_list = [back["background_image"] for back in constant_dict["background_images"] if back["id"]==background_id]
+        selected_background_image = selected_background_image_list[0]
+
+        garment_photo_path = None
+        new_filename = ""
+        if 'garment_photo' in request.files:
+            file = request.files['garment_photo']
+
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                unique_id = str(uuid.uuid4().hex[:8])
+                new_filename = f"{timestamp}_{unique_id}_{filename}"
+
+                # Save the file
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], new_filename)
+                file.save(file_path)
+                garment_photo_path = file_path
+
+        garment_data = {
+            "user_id": user_id,
+            "garment_photo_path": f"https://backendapp.stylic.ai/upload_download/{new_filename}",
+            "garment_type": garment_type,
+            "gender": gender,
+            "age_group": age_group,
+            "garment_description": garment_description,
+            "photoshoot_type": photoshoot_type,
+            "color_type": color_type,
+            "background_image": selected_background_image,
+            "is_completed": False,
+            "is_money": False,
+            "created_at": datetime.utcnow(),
+            "updated_at": datetime.utcnow()
+        }
+
+        mongoOperation().insert_data_from_coll(client, "stylic", "photoshoot_data", garment_data)
+        return commonOperation().get_success_response(200, {"message": "Photoshoot data generated"})
+
+    except Exception as e:
+        response_data = commonOperation().get_error_msg("Please try again...")
+        print(f"{datetime.now()}: Error in create photoshoot route: {str(e)}")
+        return response_data
+
 @app.route("/stylic/background-images", methods=["GET"])
 def background_images_stylic():
     try:
@@ -169,6 +224,10 @@ def background_images_stylic():
 @app.route('/download/<filename>')
 def download_file(filename):
     return send_from_directory(app.config['BACKGROUND_FOLDER'], filename)
+
+@app.route('/upload_download/<filename>')
+def download_upload_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3030)
