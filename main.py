@@ -284,7 +284,7 @@ def update_user_data():
 @app.route("/stylic/get-all-photoshoot", methods=["GET"])
 def get_all_photoshoot():
     try:
-        user_id = request.form.get("user_id")
+        user_id = request.args.get("user_id")
         get_all_photoshoot_data = list(mongoOperation().get_spec_data_from_coll(client, "stylic", "photoshoot_data", {"user_id": user_id}))
         response_data = []
         for data in get_all_photoshoot_data:
