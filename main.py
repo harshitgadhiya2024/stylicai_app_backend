@@ -156,6 +156,27 @@ def change_password():
         print(f"{datetime.now()}: Error in change password route: {str(e)}")
         return response_data
 
+@app.route("/stylic/request_more_coin", methods=["POST"])
+def request_more_coin():
+    try:
+        user_name = request.form["user_name"]
+        email = request.form["email"]
+        phonenumber = request.form["phonenumber"]
+        user_id = request.args.get("user_id")
+        mapping_dict = {
+            "user_id": user_id,
+            "username": user_name,
+            "email": email,
+            "phonenumber": phonenumber
+        }
+        mongoOperation().insert_data_from_coll(client, "stylic", "more_coin", mapping_dict)
+        return commonOperation().get_success_response(200, {"message": "Sales team contact will you soon"})
+
+    except Exception as e:
+        response_data = commonOperation().get_error_msg("Please try again...")
+        print(f"{datetime.now()}: Error in request a more coin route: {str(e)}")
+        return response_data
+
 @app.route("/stylic/create-photoshoot", methods=["POST"])
 def create_photoshoot():
     try:
