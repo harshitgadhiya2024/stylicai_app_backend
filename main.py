@@ -207,8 +207,19 @@ def create_photoshoot():
                 file.save(file_path)
                 garment_photo_path = file_path
 
+        get_all_photoshoot_data = mongoOperation().get_all_data_from_coll(client, "stylic", "photoshoot_data")
+        all_photoshootids = [photo_data["photoshoot_id"] for photo_data in get_all_photoshoot_data]
+
+        flag = True
+        photoshoot_id = ""
+        while flag:
+            photoshoot_id = str(uuid.uuid4())
+            if photoshoot_id not in all_photoshootids:
+                flag = False
+
         garment_data = {
             "user_id": user_id,
+            "photoshoot_id": photoshoot_id,
             "garment_photo_path": f"https://backendapp.stylic.ai/upload_download/{new_filename}",
             "garment_type": garment_type,
             "gender": gender,
@@ -218,6 +229,7 @@ def create_photoshoot():
             "color_type": color_type,
             "background_image": selected_background_image,
             "is_completed": False,
+            "photoshoots": [],
             "is_money": False,
             "created_at": datetime.utcnow(),
             "updated_at": datetime.utcnow()
@@ -298,6 +310,40 @@ def get_all_photoshoot():
     except Exception as e:
         response_data = commonOperation().get_error_msg("Please try again...")
         print(f"{datetime.now()}: Error in get all photoshoot route: {str(e)}")
+        return response_data
+
+@app.route("/stylic/upload_back_garment", methods=["POST"])
+def upload_back_garment():
+    try:
+        user_id = request.args.get("user_id", "")
+        photoshoot_id = request.args.get("photoshoot_id", "")
+
+        garment_back_photo_path = None
+        new_filename = ""
+        if 'garment_photo' in request.files:
+            file = request.files['garment_photo']
+
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                unique_id = str(uuid.uuid4().hex[:8])
+                new_back_filename = f"{timestamp}_{unique_id}_back_{filename}"
+
+                # Save the file
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], new_back_filename)
+                file.save(file_path)
+                garment_back_photo_path = file_path
+
+        get_photoshoot_data = list(mongoOperation().get_spec_data_from_coll(client, "stylic", "photoshoot_data", {"user_id": user_id, "photoshoot_id": photoshoot_id}))
+
+        photoshoots = get_photoshoot_data[0]["photoshoots"]
+        photoshoots.append(f"https://backendapp.stylic.ai/upload_download/{new_filename}")
+        mongoOperation().update_mongo_data(client, "stylic", "photoshoot_data", {"user_id": user_id, "photoshoot_id": photoshoot_id}, {"photoshoots": photoshoots})
+        return commonOperation().get_success_response(200, {"message": "Back photo uploaded!"})
+
+    except Exception as e:
+        response_data = commonOperation().get_error_msg("Please try again...")
+        print(f"{datetime.now()}: Error in uploading back photo route: {str(e)}")
         return response_data
 
 
