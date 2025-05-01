@@ -281,6 +281,25 @@ def update_user_data():
         print(f"{datetime.now()}: Error in updare user data route: {str(e)}")
         return response_data
 
+@app.route("/stylic/get-all-photoshoot", methods=["GET"])
+def get_all_photoshoot():
+    try:
+        user_id = request.form.get("user_id")
+        get_all_photoshoot_data = list(mongoOperation().get_spec_data_from_coll(client, "stylic", "photoshoot_data", {"user_id": user_id}))
+        response_data = []
+        for data in get_all_photoshoot_data:
+            del data["_id"]
+            del data["created_at"]
+            del data["updated_at"]
+            response_data.append(data)
+        response_data_msg = commonOperation().get_success_response(200, response_data)
+        return response_data_msg
+
+    except Exception as e:
+        response_data = commonOperation().get_error_msg("Please try again...")
+        print(f"{datetime.now()}: Error in get all photoshoot route: {str(e)}")
+        return response_data
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3030)
