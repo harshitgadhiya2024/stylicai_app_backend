@@ -268,5 +268,19 @@ def download_file(filename):
 def download_upload_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
+@app.route("/stylic/update-user-data", methods=["POST"])
+def update_user_data():
+    try:
+        user_id = request.form.get("user_id")
+        email = request.form.get("email")
+        mongoOperation().update_mongo_data(client, "stylic", "user_data", {"user_id":user_id}, {"email": email})
+        return commonOperation().get_success_response(200, {"message": "Email updated successfully..."})
+
+    except Exception as e:
+        response_data = commonOperation().get_error_msg("Please try again...")
+        print(f"{datetime.now()}: Error in updare user data route: {str(e)}")
+        return response_data
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3030)
