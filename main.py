@@ -346,6 +346,55 @@ def upload_back_garment():
         print(f"{datetime.now()}: Error in uploading back photo route: {str(e)}")
         return response_data
 
+@app.route("/stylic/dashboard", methods=["GET"])
+def dashboard():
+    try:
+        user_id = request.args.get("user_id", "")
+        photoshoot_credit, photo_credit, total_photoshoot, completed_photoshoot, pending_photoshoot = 0,0,0,0,0
+        cat_type_count = {
+            "T-Shirt": 0,
+            "Blazer": 0,
+            "Shirt": 0,
+            "Sweat-Shirt": 0,
+            "Boxer": 0,
+            "Top": 0,
+            "Camisole": 0,
+            "Jeans": 0,
+            "Dress": 0,
+            "Lingerie": 0,
+            "Jacket": 0,
+            "Other": 0
+        }
+        get_user_data = list(mongoOperation().get_spec_data_from_coll(client, "stylic", "user_data", {"user_id": user_id}))
+        photo_credit = get_user_data[0]["photo_coin"]
+        photoshoot_credit = get_user_data[0]["photoshoot_coin"]
+        get_photoshoot_data = list(mongoOperation().get_spec_data_from_coll(client, "stylic", "photoshoot_data", {"user_id": user_id}))
+        total_photoshoot = len(get_photoshoot_data)
+        for photoshoot in get_photoshoot_data:
+            if photoshoot["is_completed"]:
+                completed_photoshoot+=1
+            else:
+                pending_photoshoot+=1
+            category = photoshoot["garment_type"]
+            cat_type_count[category] = cat_type_count[category]+1
+
+        response_data = {
+            "photo_credit": photo_credit,
+            "photoshoot_credit": photoshoot_credit,
+            "total_photoshoot": total_photoshoot,
+            "completed_photoshoot": completed_photoshoot,
+            "pending_photoshoot": pending_photoshoot,
+            "cate_based_mapping": cat_type_count
+        }
+
+        return commonOperation().get_success_response(200, response_data)
+
+    except Exception as e:
+        response_data = commonOperation().get_error_msg("Please try again...")
+        print(f"{datetime.now()}: Error in dashboard route: {str(e)}")
+        return response_data
+
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3030)
