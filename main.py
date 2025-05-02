@@ -319,7 +319,7 @@ def upload_back_garment():
         photoshoot_id = request.args.get("photoshoot_id", "")
 
         garment_back_photo_path = None
-        new_filename = ""
+        new_back_filename = ""
         if 'garment_photo' in request.files:
             file = request.files['garment_photo']
 
@@ -337,7 +337,7 @@ def upload_back_garment():
         get_photoshoot_data = list(mongoOperation().get_spec_data_from_coll(client, "stylic", "photoshoot_data", {"user_id": user_id, "photoshoot_id": photoshoot_id}))
 
         photoshoots = get_photoshoot_data[0]["photoshoots"]
-        photoshoots.append(f"https://backendapp.stylic.ai/upload_download/{new_filename}")
+        photoshoots.append(f"https://backendapp.stylic.ai/upload_download/{new_back_filename}")
         mongoOperation().update_mongo_data(client, "stylic", "photoshoot_data", {"user_id": user_id, "photoshoot_id": photoshoot_id}, {"photoshoots": photoshoots})
         return commonOperation().get_success_response(200, {"message": "Back photo uploaded!"})
 
