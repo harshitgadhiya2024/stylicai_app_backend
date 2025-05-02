@@ -236,6 +236,9 @@ def create_photoshoot():
         }
 
         mongoOperation().insert_data_from_coll(client, "stylic", "photoshoot_data", garment_data)
+        html_format = htmlOperation().send_photoshoot_notification()
+        get_user_data_var = list(mongoOperation().get_spec_data_from_coll(client, "stylic", "user_data", {"user_id": user_id}))
+        emailOperation().send_email(get_user_data_var[0].get("email"), "Stylic AI: New photoshoot", html_format)
         return commonOperation().get_success_response(200, {"message": "Photoshoot data generated"})
 
     except Exception as e:
