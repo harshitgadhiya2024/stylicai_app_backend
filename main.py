@@ -52,14 +52,14 @@ def register_user():
 
         transaction_data = [
             {
-                "credits": 10,
+                "credits": 5,
                 "coin_type": "photo_coin",
                 "notes": "default",
                 "balance_type": "add",
                 "created_at": datetime.utcnow()
             },
             {
-                "credits": 10,
+                "credits": 5,
                 "coin_type": "photoshoot_coin",
                 "notes": "default",
                 "balance_type": "add",
@@ -75,8 +75,8 @@ def register_user():
             "email": email,
             "password": password,
             "phone_number": phone_number,
-            "photo_coin": 10,
-            "photoshoot_coin": 10,
+            "photo_coin": 5,
+            "photoshoot_coin": 5,
             "transaction_data": transaction_data,
             "is_active": True,
             "type": "user",
