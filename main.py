@@ -492,7 +492,7 @@ def assign_company_developer():
         print(f"{datetime.now()}: Error in creating developer: {str(e)}")
         return response_data
 
-@app.route("/stylic/check_limit", methods=["GET"])
+@app.route("/stylic/check_limit", methods=["POST"])
 def check_limit():
     try:
         user_id = request.form["user_id"]
