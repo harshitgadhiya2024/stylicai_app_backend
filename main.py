@@ -439,6 +439,97 @@ def dashboard():
         print(f"{datetime.now()}: Error in dashboard route: {str(e)}")
         return response_data
 
+@app.route("/stylic/create-developer", methods=["POST"])
+def create_developer():
+    try:
+        email = request.form["email"]
+        password = request.form["password"]
+        username = request.form["username"]
+        phone_number = request.form["phone_number"]
+
+        get_all_dev_data = mongoOperation().get_all_data_from_coll(client, "stylic", "developer_data")
+        all_developer_id = [dev_data["developer_id"] for dev_data in get_all_dev_data]
+
+        flag = True
+        developer_id = ""
+        while flag:
+            developer_id = str(uuid.uuid4())
+            if developer_id not in all_developer_id:
+                flag = False
+
+        mapping_dict = {
+            "developer_id": developer_id,
+            "username": username,
+            "phone_number": phone_number,
+            "email": email,
+            "password": password,
+            "assign_company": [],
+            "created_at": datetime.utcnow()
+        }
+
+        mongoOperation().insert_data_from_coll(client, "stylic", "developer_data", mapping_dict)
+        response_data = commonOperation().get_success_response(200, {"Developer created successfully"})
+        return response_data
+
+    except Exception as e:
+        response_data = commonOperation().get_error_msg("Please try again...")
+        print(f"{datetime.now()}: Error in creating developer: {str(e)}")
+        return response_data
+
+@app.route("/stylic/assign_company_developer", methods=["POST"])
+def assign_company_developer():
+    try:
+        developer_id = request.form["developer_id"]
+        user_id = request.form["user_id"]
+        get_all_dev_data = list(mongoOperation().get_all_data_from_coll(client, "stylic", "developer_data"))
+        company_assigned = get_all_dev_data[0]["assign_company"]
+
+        response_data = commonOperation().get_success_response(200, {"Developer created successfully"})
+        return response_data
+
+    except Exception as e:
+        response_data = commonOperation().get_error_msg("Please try again...")
+        print(f"{datetime.now()}: Error in creating developer: {str(e)}")
+        return response_data
+
+@app.route("/stylic/check_limit", methods=["GET"])
+def check_limit():
+    try:
+        user_id = request.form["user_id"]
+        photoshoot_type = request.form["photoshoot_type"]
+        all_user_data = list(mongoOperation().get_spec_data_from_coll(client, "stylic", "user_data", {"user_id": user_id}))
+        if photoshoot_type.lower() == "single photo":
+            photo_coin = all_user_data[0]["photo_coin"]
+            condition_dict = {
+                "photoshoot_type": photoshoot_type,
+                "user_id": user_id,
+                "is_completed": False
+            }
+            all_photoshoot_data = list(mongoOperation().get_spec_data_from_coll(client, "stylic", "photoshoot_data", condition_dict))
+            if photo_coin>=len(all_photoshoot_data):
+                response_data = commonOperation().get_success_response(200, {"is_verified": True})
+            else:
+                response_data = commonOperation().get_success_response(200, {"is_verified": False})
+        else:
+            photoshoot_coin = all_user_data[0]["photoshoot_coin"]
+            condition_dict = {
+                "photoshoot_type": photoshoot_type,
+                "user_id": user_id,
+                "is_completed": False
+            }
+            all_photoshoot_data = list(
+                mongoOperation().get_spec_data_from_coll(client, "stylic", "photoshoot_data", condition_dict))
+            if photoshoot_coin >= len(all_photoshoot_data):
+                response_data = commonOperation().get_success_response(200, {"is_verified": True})
+            else:
+                response_data = commonOperation().get_success_response(200, {"is_verified": False})
+
+        return response_data
+
+    except Exception as e:
+        response_data = commonOperation().get_error_msg("Please try again...")
+        print(f"{datetime.now()}: Error in checking limit: {str(e)}")
+        return response_data
 
 
 if __name__ == "__main__":
