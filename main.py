@@ -543,7 +543,12 @@ def get_transaction_history():
     try:
         user_id = request.form["user_id"]
         all_user_data = list(mongoOperation().get_spec_data_from_coll(client, "stylic", "user_data", {"user_id": user_id}))
-        response_data = commonOperation().get_success_response(200, all_user_data[0]["transaction_data"])
+        transaction_data = all_user_data[0]["transaction_data"]
+        updated_data = []
+        for data in transaction_data:
+            del data["created_at"]
+            updated_data.append(data)
+        response_data = commonOperation().get_success_response(200, updated_data)
         return response_data
 
     except Exception as e:
