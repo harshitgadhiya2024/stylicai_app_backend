@@ -50,6 +50,23 @@ def register_user():
             if user_id not in all_userids:
                 flag = False
 
+        transaction_data = [
+            {
+                "credits": 10,
+                "coin_type": "photo_coin",
+                "notes": "default",
+                "balance_type": "add",
+                "created_at": datetime.utcnow()
+            },
+            {
+                "credits": 10,
+                "coin_type": "photoshoot_coin",
+                "notes": "default",
+                "balance_type": "add",
+                "created_at": datetime.utcnow()
+            }
+        ]
+
         mapping_dict = {
             "user_id": user_id,
             "first_name": first_name,
@@ -60,6 +77,7 @@ def register_user():
             "phone_number": phone_number,
             "photo_coin": 10,
             "photoshoot_coin": 10,
+            "transaction_data": transaction_data,
             "is_active": True,
             "type": "user",
             "created_at": datetime.utcnow(),
@@ -287,8 +305,32 @@ def download_upload_file(filename):
 def update_user_data():
     try:
         user_id = request.form.get("user_id")
+        first_name = request.form.get("first_name")
+        last_name = request.form.get("last_name")
+        company_name = request.form.get("company_name")
         email = request.form.get("email")
-        mongoOperation().update_mongo_data(client, "stylic", "user_data", {"user_id":user_id}, {"email": email})
+        password = request.form.get("password")
+        phone_number = request.form.get("phone_number", "")
+        update_mapping_dict = {}
+        if first_name:
+            update_mapping_dict["first_name"]=first_name
+
+        if last_name:
+            update_mapping_dict["last_name"]=last_name
+
+        if company_name:
+            update_mapping_dict["company_name"]=company_name
+
+        if email:
+            update_mapping_dict["email"]=email
+
+        if password:
+            update_mapping_dict["password"]=password
+
+        if phone_number:
+            update_mapping_dict["phone_number"]=phone_number
+
+        mongoOperation().update_mongo_data(client, "stylic", "user_data", {"user_id":user_id}, update_mapping_dict)
         return commonOperation().get_success_response(200, {"message": "Email updated successfully..."})
 
     except Exception as e:
