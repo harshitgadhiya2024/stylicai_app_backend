@@ -42,6 +42,7 @@ def register_user():
 
         get_all_user_data = mongoOperation().get_all_data_from_coll(client, "stylic", "user_data")
         all_userids = [user_data["user_id"] for user_data in get_all_user_data]
+        get_all_dev_data = list(mongoOperation().get_all_data_from_coll(client, "stylic", "developer_data"))
 
         flag = True
         user_id = ""
@@ -69,6 +70,7 @@ def register_user():
 
         mapping_dict = {
             "user_id": user_id,
+            "developer_id": get_all_dev_data[0]["developer_id"],
             "first_name": first_name,
             "last_name": last_name,
             "company_name": company_name,
@@ -468,7 +470,7 @@ def create_developer():
         }
 
         mongoOperation().insert_data_from_coll(client, "stylic", "developer_data", mapping_dict)
-        response_data = commonOperation().get_success_response(200, {"Developer created successfully"})
+        response_data = commonOperation().get_success_response(200, {"message": "Developer created successfully"})
         return response_data
 
     except Exception as e:
@@ -483,13 +485,15 @@ def assign_company_developer():
         user_id = request.form["user_id"]
         get_all_dev_data = list(mongoOperation().get_all_data_from_coll(client, "stylic", "developer_data"))
         company_assigned = get_all_dev_data[0]["assign_company"]
-
-        response_data = commonOperation().get_success_response(200, {"Developer created successfully"})
+        company_assigned.append({"user_id": user_id, "is_active": True})
+        mongoOperation().update_mongo_data(client, "stylic", "user_data", {"user_id": user_id}, {"developer_id": developer_id})
+        mongoOperation().update_mongo_data(client, "stylic", "developer_data", {"developer_id": developer_id}, {"assign_company": company_assigned})
+        response_data = commonOperation().get_success_response(200, {"message": "Developer assigned successfully"})
         return response_data
 
     except Exception as e:
         response_data = commonOperation().get_error_msg("Please try again...")
-        print(f"{datetime.now()}: Error in creating developer: {str(e)}")
+        print(f"{datetime.now()}: Error in assign developer: {str(e)}")
         return response_data
 
 @app.route("/stylic/check_limit", methods=["POST"])
@@ -530,6 +534,45 @@ def check_limit():
         response_data = commonOperation().get_error_msg("Please try again...")
         print(f"{datetime.now()}: Error in checking limit: {str(e)}")
         return response_data
+
+# @app.route("/stylic/check_limit", methods=["POST"])
+# def check_limit():
+#     try:
+#         user_id = request.form["user_id"]
+#         photoshoot_type = request.form["photoshoot_type"]
+#         all_user_data = list(mongoOperation().get_spec_data_from_coll(client, "stylic", "user_data", {"user_id": user_id}))
+#         if photoshoot_type.lower() == "single photo":
+#             photo_coin = all_user_data[0]["photo_coin"]
+#             condition_dict = {
+#                 "photoshoot_type": photoshoot_type,
+#                 "user_id": user_id,
+#                 "is_completed": False
+#             }
+#             all_photoshoot_data = list(mongoOperation().get_spec_data_from_coll(client, "stylic", "photoshoot_data", condition_dict))
+#             if photo_coin>len(all_photoshoot_data):
+#                 response_data = commonOperation().get_success_response(200, {"is_verified": True})
+#             else:
+#                 response_data = commonOperation().get_success_response(200, {"is_verified": False})
+#         else:
+#             photoshoot_coin = all_user_data[0]["photoshoot_coin"]
+#             condition_dict = {
+#                 "photoshoot_type": photoshoot_type,
+#                 "user_id": user_id,
+#                 "is_completed": False
+#             }
+#             all_photoshoot_data = list(
+#                 mongoOperation().get_spec_data_from_coll(client, "stylic", "photoshoot_data", condition_dict))
+#             if photoshoot_coin >= len(all_photoshoot_data):
+#                 response_data = commonOperation().get_success_response(200, {"is_verified": True})
+#             else:
+#                 response_data = commonOperation().get_success_response(200, {"is_verified": False})
+#
+#         return response_data
+#
+#     except Exception as e:
+#         response_data = commonOperation().get_error_msg("Please try again...")
+#         print(f"{datetime.now()}: Error in checking limit: {str(e)}")
+#         return response_data
 
 
 if __name__ == "__main__":
