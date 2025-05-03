@@ -506,7 +506,7 @@ def check_limit():
                 "is_completed": False
             }
             all_photoshoot_data = list(mongoOperation().get_spec_data_from_coll(client, "stylic", "photoshoot_data", condition_dict))
-            if photo_coin>=len(all_photoshoot_data):
+            if photo_coin>len(all_photoshoot_data):
                 response_data = commonOperation().get_success_response(200, {"is_verified": True})
             else:
                 response_data = commonOperation().get_success_response(200, {"is_verified": False})
