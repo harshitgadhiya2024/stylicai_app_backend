@@ -257,8 +257,11 @@ def create_photoshoot():
 
         mongoOperation().insert_data_from_coll(client, "stylic", "photoshoot_data", garment_data)
         html_format = htmlOperation().send_photoshoot_notification()
-        get_user_data_var = list(mongoOperation().get_spec_data_from_coll(client, "stylic", "user_data", {"user_id": user_id}))
-        emailOperation().send_email(get_user_data_var[0].get("email"), "Stylic AI: New photoshoot", html_format)
+        get_user_data = list(mongoOperation().get_spec_data_from_coll(client, "stylic", "user_data", {"user_id": user_id}))
+        developer_id = get_user_data[0]["developer_id"]
+        get_developer_data = list(mongoOperation().get_spec_data_from_coll(client, "stylic", "developer_data",{"developer_id": developer_id}))
+        developer_email = get_developer_data[0]["email"]
+        emailOperation().send_email(developer_email, "Stylic AI: New photoshoot", html_format)
         return commonOperation().get_success_response(200, {"message": "Photoshoot data generated"})
 
     except Exception as e:
@@ -535,44 +538,18 @@ def check_limit():
         print(f"{datetime.now()}: Error in checking limit: {str(e)}")
         return response_data
 
-# @app.route("/stylic/check_limit", methods=["POST"])
-# def check_limit():
-#     try:
-#         user_id = request.form["user_id"]
-#         photoshoot_type = request.form["photoshoot_type"]
-#         all_user_data = list(mongoOperation().get_spec_data_from_coll(client, "stylic", "user_data", {"user_id": user_id}))
-#         if photoshoot_type.lower() == "single photo":
-#             photo_coin = all_user_data[0]["photo_coin"]
-#             condition_dict = {
-#                 "photoshoot_type": photoshoot_type,
-#                 "user_id": user_id,
-#                 "is_completed": False
-#             }
-#             all_photoshoot_data = list(mongoOperation().get_spec_data_from_coll(client, "stylic", "photoshoot_data", condition_dict))
-#             if photo_coin>len(all_photoshoot_data):
-#                 response_data = commonOperation().get_success_response(200, {"is_verified": True})
-#             else:
-#                 response_data = commonOperation().get_success_response(200, {"is_verified": False})
-#         else:
-#             photoshoot_coin = all_user_data[0]["photoshoot_coin"]
-#             condition_dict = {
-#                 "photoshoot_type": photoshoot_type,
-#                 "user_id": user_id,
-#                 "is_completed": False
-#             }
-#             all_photoshoot_data = list(
-#                 mongoOperation().get_spec_data_from_coll(client, "stylic", "photoshoot_data", condition_dict))
-#             if photoshoot_coin >= len(all_photoshoot_data):
-#                 response_data = commonOperation().get_success_response(200, {"is_verified": True})
-#             else:
-#                 response_data = commonOperation().get_success_response(200, {"is_verified": False})
-#
-#         return response_data
-#
-#     except Exception as e:
-#         response_data = commonOperation().get_error_msg("Please try again...")
-#         print(f"{datetime.now()}: Error in checking limit: {str(e)}")
-#         return response_data
+@app.route("/stylic/get_transaction_history", methods=["POST"])
+def get_transaction_history():
+    try:
+        user_id = request.form["user_id"]
+        all_user_data = list(mongoOperation().get_spec_data_from_coll(client, "stylic", "user_data", {"user_id": user_id}))
+        response_data = commonOperation().get_success_response(200, all_user_data[0]["transaction_data"])
+        return response_data
+
+    except Exception as e:
+        response_data = commonOperation().get_error_msg("Please try again...")
+        print(f"{datetime.now()}: Error in transaction history: {str(e)}")
+        return response_data
 
 
 if __name__ == "__main__":
