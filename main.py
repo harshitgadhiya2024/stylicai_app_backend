@@ -556,6 +556,24 @@ def get_transaction_history():
         print(f"{datetime.now()}: Error in transaction history: {str(e)}")
         return response_data
 
+@app.route("/stylic/get_spec_photoshoot_details", methods=["POST"])
+def get_spec_photoshoot_details():
+    try:
+        user_id = request.form["user_id"]
+        all_user_data = list(mongoOperation().get_spec_data_from_coll(client, "stylic", "user_data", {"user_id": user_id}))
+        transaction_data = all_user_data[0]["transaction_data"]
+        updated_data = []
+        for data in transaction_data:
+            del data["created_at"]
+            updated_data.append(data)
+        response_data = commonOperation().get_success_response(200, updated_data)
+        return response_data
+
+    except Exception as e:
+        response_data = commonOperation().get_error_msg("Please try again...")
+        print(f"{datetime.now()}: Error in transaction history: {str(e)}")
+        return response_data
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3030)
